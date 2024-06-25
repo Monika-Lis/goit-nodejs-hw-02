@@ -17,12 +17,6 @@ const contactSchema = Joi.object({
   phone: Joi.string().required(),
 });
 
-const updateSchema = Joi.object({
-  name: Joi.string(),
-  email: Joi.string().email(),
-  phone: Joi.string(),
-}).min(1);
-
 router.get("/", async (req, res, next) => {
   try {
     const contacts = await listContacts();
@@ -69,7 +63,7 @@ router.delete("/:contactId", async (req, res, next) => {
 
 router.put("/:contactId", async (req, res, next) => {
   try {
-    const { error } = updateSchema.validate(req.body);
+    const { error } = contactSchema.validate(req.body);
     if (error) return res.status(400).json({ message: "missing fields" });
 
     const updatedContact = await updateContact(req.params.contactId, req.body);
