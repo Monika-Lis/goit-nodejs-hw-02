@@ -7,6 +7,7 @@ const {
   removeContact,
   addContact,
   updateContact,
+  updateStatusContact,
 } = require("../../models/contacts");
 
 const router = express.Router();
@@ -15,8 +16,10 @@ const contactSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().email().required(),
   phone: Joi.string().required(),
+  favorite: Joi.boolean(),
 });
 
+// CONTACT LIST
 router.get("/", async (req, res, next) => {
   try {
     const contacts = await listContacts();
@@ -26,6 +29,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+// CONTACT BY ID
 router.get("/:contactId", async (req, res, next) => {
   try {
     const contact = await getContactById(req.params.contactId);
@@ -36,6 +40,7 @@ router.get("/:contactId", async (req, res, next) => {
   }
 });
 
+// NEW CONTACT
 router.post("/", async (req, res, next) => {
   try {
     const { error } = contactSchema.validate(req.body);
@@ -51,6 +56,7 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+// DELETE CONTACT
 router.delete("/:contactId", async (req, res, next) => {
   try {
     const success = await removeContact(req.params.contactId);
@@ -61,12 +67,32 @@ router.delete("/:contactId", async (req, res, next) => {
   }
 });
 
+//UPDATE CONTACT
 router.put("/:contactId", async (req, res, next) => {
   try {
     const { error } = contactSchema.validate(req.body);
     if (error) return res.status(400).json({ message: "missing fields" });
 
     const updatedContact = await updateContact(req.params.contactId, req.body);
+    if (!updatedContact) return res.status(404).json({ message: "Not found" });
+
+    res.status(200).json(updatedContact);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// UPDATE STATUS
+router.patch("/:contactId/favorite", async (req, res, next) => {
+  try {
+    const { error } = favoriteSchema.validate(req.body);
+    if (error)
+      return res.status(400).json({ message: "missing field favorite" });
+
+    const updatedContact = await updateStatusContact(
+      req.params.contactId,
+      req.body
+    );
     if (!updatedContact) return res.status(404).json({ message: "Not found" });
 
     res.status(200).json(updatedContact);
