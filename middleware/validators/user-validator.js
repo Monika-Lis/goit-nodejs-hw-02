@@ -1,0 +1,30 @@
+const Joi = require("joi");
+
+const userSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().min(8).required(),
+  subscription: Joi.string().valid("starter", "pro", "business"),
+  token: Joi.string(),
+});
+
+const subscriptionSchema = Joi.object({
+  subscription: Joi.string().valid("starter", "pro", "business"),
+});
+
+const validateUser = (req, res, next) => {
+  const { error } = userSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+  next();
+};
+
+const validateSubscription = (req, res, next) => {
+  const { error } = subscriptionSchema.validate(req.query);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+  next();
+};
+
+module.exports = { validateUser, validateSubscription };
