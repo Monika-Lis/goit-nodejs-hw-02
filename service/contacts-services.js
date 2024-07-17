@@ -1,35 +1,34 @@
 const Contact = require("./schemas/contact-schema");
 
-const listContacts = (filter, skip, limit) => {
+const listContactsService = (filter, skip, limit) => {
   return Contact.find(filter).skip(skip).limit(limit);
 };
 
-const getContactById = (filter) => {
+const getContactByIdService = (filter) => {
   return Contact.findById(filter);
 };
 
-const removeContact = (filter) => {
-  const result = Contact.findByIdAndDelete(filter);
-  return result ? true : false;
+const removeContactService = (filter) => {
+  return Contact.deleteOne(filter);
 };
 
-const addContact = (userId, { name, email, phone }) => {
+const addContactService = (userId, { name, email, phone }) => {
   return Contact.create({ name, email, phone, owner: userId });
 };
 
-const updateContact = (filter) => {
-  return Contact.findByIdAndUpdate(filter, body, { new: true });
+const updateContactService = (filter, updateData) => {
+  return Contact.findByIdAndUpdate(filter, updateData, { new: true });
 };
 
-const updateStatusContact = (filter, { favorite }) => {
+const updateStatusContactService = (filter, favorite) => {
   return Contact.findByIdAndUpdate(filter, { favorite }, { new: true });
 };
 
 module.exports = {
-  listContacts,
-  getContactById,
-  removeContact,
-  addContact,
-  updateContact,
-  updateStatusContact,
+  listContactsService,
+  getContactByIdService,
+  removeContactService,
+  addContactService,
+  updateContactService,
+  updateStatusContactService,
 };

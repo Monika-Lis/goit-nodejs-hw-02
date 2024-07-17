@@ -2,7 +2,7 @@ const Joi = require("joi");
 
 const userSchema = Joi.object({
   email: Joi.string().email().required(),
-  password: Joi.string().min(8).required(),
+  password: Joi.string().min(5).required(),
   subscription: Joi.string().valid("starter", "pro", "business"),
   token: Joi.string(),
 });
@@ -20,7 +20,7 @@ const validateUser = (req, res, next) => {
 };
 
 const validateSubscription = (req, res, next) => {
-  const { error } = subscriptionSchema.validate(req.query);
+  const { error } = subscriptionSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
