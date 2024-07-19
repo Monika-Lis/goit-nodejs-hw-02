@@ -60,13 +60,6 @@ const logIn = async (req, res, next) => {
 const logOut = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(401).json({
-        status: "error",
-        code: 401,
-        message: "Not authorized",
-      });
-    }
     user.token = null;
     await user.save();
     res.status(204).json({ message: "You successfully logged out" });
