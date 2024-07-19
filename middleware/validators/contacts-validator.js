@@ -7,7 +7,7 @@ const contactSchema = Joi.object({
   favorite: Joi.boolean(),
 });
 
-const favoriteSchema = Joi.object({ favorite: Joi.boolean.required() });
+const favoriteSchema = Joi.object({ favorite: Joi.boolean().required() });
 
 const validateContact = (req, res, next) => {
   const { error } = contactSchema.validate(req.body);

@@ -18,6 +18,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.5",
     "morgan": "^1.10.0",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
@@ -27,6 +29,6 @@
     "eslint-plugin-import": "2.25.3",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "5.2.0",
-    "nodemon": "2.0.15"
+    "nodemon": "^2.0.15"
   }
 }

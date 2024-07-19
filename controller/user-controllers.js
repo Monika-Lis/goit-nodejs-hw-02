@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../../service/schemas/user-schema");
+const User = require("../service/schemas/user-schema");
 
 require("dotenv").config();
 const secret = process.env.SECRET;
@@ -9,7 +9,7 @@ const registerUser = async (req, res, next) => {
     const { email, password } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ message: "Emaul in use" });
+      return res.status(409).json({ message: "Email in use" });
     }
 
     const newUser = new User({ email });
@@ -23,7 +23,7 @@ const registerUser = async (req, res, next) => {
       },
     });
   } catch (error) {
-    next();
+    next(error);
   }
 };
 
@@ -50,7 +50,7 @@ const logIn = async (req, res, next) => {
     await user.save();
     res.json({
       token,
-      user: { email: user.email, subscription: user.subscritpion },
+      user: { email: user.email, subscription: user.subscription },
     });
   } catch (error) {
     next(error);
@@ -62,7 +62,7 @@ const logOut = async (req, res, next) => {
     const user = await User.findById(req.user._id);
     user.token = null;
     await user.save();
-    res.ststus(204).send();
+    res.status(204).json({ message: "You successfully logged out" });
   } catch (error) {
     next(error);
   }
