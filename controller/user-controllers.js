@@ -54,12 +54,25 @@ const logIn = async (req, res, next) => {
     const token = jwt.sign(payload, secret, { expiresIn: "1d" });
     user.token = token;
     await user.save();
+
+    let avatarLink = "";
+
+    const avatarURL = user.avatarURL;
+
+    if (avatarURL.includes("avatars")) {
+      avatarLink = `http://localhost:${
+        process.env.MAIN_PORT || 3000
+      }/${avatarURL}`;
+    } else {
+      avatarLink = avatarURL;
+    }
+
     res.json({
       token,
       user: {
         email: user.email,
         subscription: user.subscription,
-        avatarURL: user.avatarURL,
+        avatarURL: avatarLink,
       },
     });
   } catch (error) {
@@ -80,11 +93,23 @@ const logOut = async (req, res, next) => {
 
 const currentUser = async (req, res, next) => {
   try {
-    return res.status(200).json({
+    let avatarLink = "";
+
+    const avatarURL = req.user.avatarURL;
+
+    if (avatarURL.includes("avatars")) {
+      avatarLink = `http://localhost:${
+        process.env.MAIN_PORT || 3000
+      }/${avatarURL}`;
+    } else {
+      avatarLink = avatarURL;
+    }
+
+    res.status(200).json({
       user: {
         email: req.user.email,
         subscription: req.user.subscription,
-        avatar: req.user.avatarURL,
+        avatar: avatarLink,
       },
     });
   } catch (error) {
