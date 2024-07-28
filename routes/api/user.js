@@ -3,6 +3,8 @@ const auth = require("../../middleware/authorisation/auth");
 const User = require("../../service/schemas/user-schema");
 const {
   registerUser,
+  verifyEmail,
+  resendVerificationEmail,
   logIn,
   logOut,
   currentUser,
@@ -12,6 +14,7 @@ const {
 const {
   validateUser,
   validateSubscription,
+  validateUserEmail,
 } = require("../../middleware/validators/user-validator");
 const upload = require("../../middleware/upload");
 
@@ -19,6 +22,12 @@ const router = express.Router();
 
 //REGISTER
 router.post("/signup", validateUser, registerUser);
+
+//VERIFY EMAIL
+router.get("/verify/:verificationToken", verifyEmail);
+
+//RESEND VERIFICATION EMAIL
+router.post("/verify", validateUserEmail, resendVerificationEmail);
 
 //LOG IN
 router.post("/login", validateUser, logIn);
