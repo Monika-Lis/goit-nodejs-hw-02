@@ -1,5 +1,9 @@
 const jwt = require("jsonwebtoken");
 const User = require("../service/schemas/user-schema");
+const Jimp = require("jimp");
+const gravatar = require("gravatar");
+const fs = require("fs").promises;
+const path = require("path");
 
 require("dotenv").config();
 const secret = process.env.SECRET;
@@ -12,7 +16,8 @@ const registerUser = async (req, res, next) => {
       return res.status(409).json({ message: "Email in use" });
     }
 
-    const newUser = new User({ email });
+    const avatarURL = gravatar.url(email, { s: "250", d: "identicon" });
+    const newUser = new User({ email, avatarURL });
     await newUser.setPassword(password);
     await newUser.save();
 
@@ -20,6 +25,7 @@ const registerUser = async (req, res, next) => {
       user: {
         email: newUser.email,
         subscription: newUser.subscription,
+        avatarURL: newUser.avatarURL,
       },
     });
   } catch (error) {
@@ -48,9 +54,26 @@ const logIn = async (req, res, next) => {
     const token = jwt.sign(payload, secret, { expiresIn: "1d" });
     user.token = token;
     await user.save();
+
+    let avatarLink = "";
+
+    const avatarURL = user.avatarURL;
+
+    if (avatarURL.includes("avatars")) {
+      avatarLink = `http://localhost:${
+        process.env.MAIN_PORT || 3000
+      }/${avatarURL}`;
+    } else {
+      avatarLink = avatarURL;
+    }
+
     res.json({
       token,
-      user: { email: user.email, subscription: user.subscription },
+      user: {
+        email: user.email,
+        subscription: user.subscription,
+        avatarURL: avatarLink,
+      },
     });
   } catch (error) {
     next(error);
@@ -70,10 +93,23 @@ const logOut = async (req, res, next) => {
 
 const currentUser = async (req, res, next) => {
   try {
-    return res.status(200).json({
+    let avatarLink = "";
+
+    const avatarURL = req.user.avatarURL;
+
+    if (avatarURL.includes("avatars")) {
+      avatarLink = `http://localhost:${
+        process.env.MAIN_PORT || 3000
+      }/${avatarURL}`;
+    } else {
+      avatarLink = avatarURL;
+    }
+
+    res.status(200).json({
       user: {
         email: req.user.email,
         subscription: req.user.subscription,
+        avatar: avatarLink,
       },
     });
   } catch (error) {
@@ -102,10 +138,40 @@ const updateSubscription = async (req, res, next) => {
   }
 };
 
+const updateAvatar = async (req, res, next) => {
+  try {
+    const { path: tmpPath, originalname } = req.file;
+    const { _id: userId } = req.user;
+
+    const img = await Jimp.read(tmpPath);
+    await img.resize(250, 250).writeAsync(tmpPath);
+
+    const avatarsDir = path.join(__dirname, "../public/avatars");
+    const newAvatarName = `${userId}-${originalname}`;
+    const avatarURL = path.join("avatars", newAvatarName);
+    const publicPath = path.join(avatarsDir, newAvatarName);
+
+    await fs.rename(tmpPath, publicPath);
+
+    await User.findByIdAndUpdate(userId, { avatarURL });
+
+    const avatarLink = `http://localhost:${
+      process.env.MAIN_PORT || 3000
+    }/${avatarURL}`;
+
+    res.status(200).json({
+      avatarURL: avatarLink,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   registerUser,
   logIn,
   logOut,
   currentUser,
   updateSubscription,
+  updateAvatar,
 };
